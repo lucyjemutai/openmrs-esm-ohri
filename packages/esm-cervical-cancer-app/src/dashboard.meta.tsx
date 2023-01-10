@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import styles from './dashboard.scss';
-
 export const CaCxSummary_dashboardMeta = {
   slot: 'cacx-summary-slot',
   columns: 1,

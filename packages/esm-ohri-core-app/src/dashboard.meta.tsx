@@ -1,4 +1,3 @@
-import React from 'react';
 import { Home, ListBulleted, Calendar, Medication, Events } from '@carbon/react/icons';
 
 export const homeDashboardMeta = {

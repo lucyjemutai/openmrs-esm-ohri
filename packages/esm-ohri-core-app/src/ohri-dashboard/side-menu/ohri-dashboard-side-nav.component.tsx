@@ -1,7 +1,6 @@
 import React from 'react';
-import { SideNav, SideNavItems, SideNavLink } from '@carbon/react';
+import { SideNav, SideNavItems } from '@carbon/react';
 import styles from './ohri-dashboard-side-nav.scss';
-import { ListBulleted, Calendar } from '@carbon/react/icons';
 import { ExtensionSlot } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 
