@@ -1,0 +1,85 @@
+name: OHRI Config - Importmap, Deployment
+
+on:
+  push:
+    branches:
+      - dev-config-cd
+      - working-config-cd
+      - demo-config-cd
+
+  pull_request:
+    branches:
+      - dev-config-cd
+      - working-config-cd
+      - demo-config-cd
+    types: [opened, synchronize]
+
+  release:
+    types:
+      - created
+
+jobs:
+  build_mono_repos:
+     runs-on: ubuntu-latest
+
+     steps:
+     - uses: actions/checkout@v3
+     - uses: preactjs/compressed-size-action@v2
+       with:
+        build-script: "lerna run build"
+        minimum-change-threshold: 10000 # 10 KB
+
+
+  rename_import_map_working:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into Dev Server and rename, backup importmap
+        if: ${{ github.ref == 'refs/heads/working-config-cd' }}
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          host: ${{ secrets.HISTAC_HOST }}
+          username: ${{ secrets.HISTAC_USERNAME }}
+          privateKey: ${{ secrets.HISTAC_KEY}}
+          port: ${{ secrets.HISTAC_PORT }}
+          command: |
+            cd /usr/share/tomcat/microfrontends/working
+            mv importmap.json importmap_backup_$(date +"%Y-%m-%d").json
+
+  update_import_map_working:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.ref == 'refs/heads/working-config-cd' && github.event_name == 'push' }}
+
+    steps:
+      - name: Checkout repo to make config folder local
+        uses: actions/checkout@v3
+        with:
+          ref: working-config-cd
+      - run: ls -la
+
+      - name: Copy Branch Dev Import Map to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: config/importmap_dev.json
+          remote: /usr/share/tomcat/microfrontends/working
+          host: ${{ secrets.HISTAC_HOST }}
+          username: ${{ secrets.HISTAC_USERNAME }}
+          privateKey: ${{ secrets.HISTAC_KEY}}
+          port: ${{ secrets.HISTAC_PORT }}
+
+  backup_frontend_working:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into Working Server and backup frontend folder
+        if: ${{ github.ref == 'refs/heads/working-config-cd' }}
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          host: ${{ secrets.HISTAC_HOST }}
+          username: ${{ secrets.HISTAC_USERNAME }}
+          privateKey: ${{ secrets.HISTAC_KEY}}
+          port: ${{ secrets.HISTAC_PORT }}
+          command: |
+            cd /usr/share/tomcat/tomcat9-omrs-working/.OpenMRS/
+            cp -r frontend frontend_backup_$(date +"%Y-%m-%d")
