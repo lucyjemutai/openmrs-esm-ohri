@@ -25,7 +25,7 @@ export const cacxDashboard = getSyncLifecycle(createDashboardGroup(cervicalCance
   options,
  );
 export const cacxSummaryDashboardLink = getSyncLifecycle(createDashboardLink(caCxSummaryDashboardMeta),
-  options,
+  options
  );
 
 export const cacxSummaryDashboard = getAsyncLifecycle(() => import('./views/cacx-summary/cacx-summary.component'), {
